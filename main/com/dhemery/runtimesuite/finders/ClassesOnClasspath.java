@@ -26,6 +26,10 @@ public class ClassesOnClasspath implements ClassFinder {
 
 	private boolean includeJars;
 
+	public ClassesOnClasspath() {
+		this(System.getProperty("java.class.path"));
+	}
+
 	/**
 	 * @param classpathList the list of directories to search for classes,
 	 * separated by {@link File#pathSeparatorChar}.

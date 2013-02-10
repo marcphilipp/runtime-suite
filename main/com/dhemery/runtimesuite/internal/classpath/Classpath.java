@@ -60,6 +60,8 @@ public class Classpath {
 						classes.add(c);
 				} catch (ClassNotFoundException e) {
 					// ignore
+				} catch (NoClassDefFoundError e) {
+					// ignore
 				}
 			}
 		}
