@@ -14,7 +14,6 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import com.dhemery.runtimesuite.ClassFilter;
 
 @SuppressWarnings("unchecked")
 public class ClasspathFromDirectoryTest {
@@ -65,19 +64,5 @@ public class ClasspathFromDirectoryTest {
 
 	private Class<?> classForName(String className) throws ClassNotFoundException {
 		return Class.forName(className, true, classLoader);
-	}
-
-	private final class AnyClassFilter implements ClassFilter {
-		@Override
-		public boolean passes(Class<?> candidateClass) {
-			return true;
-		}
-	}
-
-	private final class NoneClassFilter implements ClassFilter {
-		@Override
-		public boolean passes(Class<?> candidateClass) {
-			return false;
-		}
 	}
 }

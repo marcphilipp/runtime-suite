@@ -71,6 +71,6 @@ public class ClassesOnClasspath implements ClassFinder {
 	}
 
 	private boolean include(Classpath classpath) {
-		return classpath.isDirectory() || classpath.isJarOrZipFile() && includeJars;
+		return classpath.isDirectory() || includeJars && (classpath.isJarOrZipFile() || classpath.isWildcard());
 	}
 }

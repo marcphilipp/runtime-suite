@@ -19,6 +19,8 @@ import com.dhemery.runtimesuite.ClassFilter;
  */
 public class Classpath {
 	private final Logger log = LoggerFactory.getLogger(Classpath.class);
+
+	private final FileInspector fileInspector = new FileInspector();
 	private final String classpath;
 	private final ClassLoader classLoader;
 
@@ -27,13 +29,16 @@ public class Classpath {
 		this.classLoader = classLoader;
 	}
 
-	public boolean isJarOrZipFile() {
-		File file = classpathFile();
-		return hasExtension(file, ".jar") || hasExtension(file, ".zip");
-	}
-
 	public boolean isDirectory() {
 		return classpathFile().isDirectory();
+	}
+
+	public boolean isJarOrZipFile() {
+		return fileInspector.isJarOrZipFile(classpathFile());
+	}
+
+	public boolean isWildcard() {
+		return classpath.endsWith("/*");
 	}
 
 	public Collection<Class<?>> classes(ClassFilter filter) {
@@ -46,13 +51,15 @@ public class Classpath {
 			return new FilenamesInDirectory(classpathFile());
 		if (isJarOrZipFile())
 			return new FilenamesInJar(classpathFile());
+		if (isWildcard())
+			return new FilenamesInWildcard(classpath);
 		return emptyList();
 	}
 	
 	private Collection<Class<?>> classes(Iterable<String> fileNames, ClassFilter filter) {
 		Collection<Class<?>> classes = new ArrayList<Class<?>>();
 		for(String fileName : fileNames) {
-			if(isClassFile(fileName)) {
+			if(fileInspector.isClassFile(fileName)) {
 				try {
 					Class<?> c = classForFile(fileName);
 					if(filter.passes(c))  {
@@ -82,16 +89,7 @@ public class Classpath {
 	}
 
 	private String stripExtension(String filePath) {
-		int baseNameLength = filePath.length() - ".class".length();
-		return filePath.substring(0, baseNameLength);
-	}
-
-	private boolean isClassFile(String fileName) {
-		return fileName.endsWith(".class");
-	}
-
-	private boolean hasExtension(File file, String extension) {
-		return file.getName().endsWith(extension) || file.getName().endsWith(extension.toUpperCase());
+		return fileInspector.stripExtension(filePath, ".class");
 	}
 
 	private File classpathFile() {
