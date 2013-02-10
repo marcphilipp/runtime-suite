@@ -9,7 +9,7 @@ import example.tests.Runnable2;
 import example.tests.Runnable3;
 
 import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.CoreMatchers.*;
 
 
 public class AListedClassesFinder {

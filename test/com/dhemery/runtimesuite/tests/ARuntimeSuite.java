@@ -1,7 +1,7 @@
 package com.dhemery.runtimesuite.tests;
 
 import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.CoreMatchers.*;
 import java.util.List;
 
 import org.hamcrest.Matcher;
@@ -71,30 +71,32 @@ public class ARuntimeSuite {
 	@Test
 	public void appliesOnlyCorrectlyDeclaredClassFilters() {
 		runner.run(SuiteWithGoodAndBadClassFilters.class);
-		assertThat(executed.tests, containsInAnyOrder("runnable1", "runnable2"));
+		assertThat(executed.tests.size(), is(2));
+		assertThat(executed.tests, hasItems("runnable1", "runnable2"));
 	}
 
 	@Test
 	public void appliesClassFilterFieldsDeclaredAsDerivedTypes() {
 		runner.run(SuiteWithClassFilterDeclaredAsSubtype.class);
-		assertThat(executed.tests, not(contains("runnable2")));
+		assertThat(executed.tests, not(hasItem("runnable2")));
 	}
 
 	@Test
 	public void runsAllMethodsIfNoFilters() {
 		runner.run(SuiteWithNoMethodFilters.class);
-		assertThat(executed.tests, contains("a_test1", "a_test2", "b_test1", "b_test2"));
+		assertThat(executed.tests.size(), is(4));
+		assertThat(executed.tests, hasItems("a_test1", "a_test2", "b_test1", "b_test2"));
 	}
 
 	@Test
 	public void runsOnlyTestMethodsThatSurviveMethodFilters() {
 		runner.run(SuiteWithMethodFilters.class);
-		assertThat(executed.tests, contains("a_test1"));
+		assertThat(executed.tests, hasItem("a_test1"));
 	}
 
 	@Test
 	public void ignoresNonTestMethods() {
 		runner.run(SuiteWithAllBadTests.class);
-		assertThat(executed.tests, hasSize(0));
+		assertThat(executed.tests.size(), is(0));
 	}
 }

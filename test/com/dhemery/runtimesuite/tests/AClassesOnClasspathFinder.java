@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.dhemery.runtimesuite.finders.ClassesOnClasspath;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 public class AClassesOnClasspathFinder {
@@ -84,6 +84,6 @@ public class AClassesOnClasspathFinder {
 	
 	@Test public void ignoresNonDirectoryClasspathElements() {
 		Collection<Class<?>> foundClasses = new ClassesOnClasspath("no.such.directory").find();
-		assertThat(foundClasses, hasSize(0));
+		assertThat(foundClasses.size(), is(0));
 	}
 }
