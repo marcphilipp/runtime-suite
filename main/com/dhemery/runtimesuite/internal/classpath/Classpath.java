@@ -20,9 +20,11 @@ import com.dhemery.runtimesuite.ClassFilter;
 public class Classpath {
 	private final Logger log = LoggerFactory.getLogger(Classpath.class);
 	private final String classpath;
+	private final ClassLoader classLoader;
 
-	public Classpath(String classpath) {
+	public Classpath(String classpath, ClassLoader classLoader) {
 		this.classpath = classpath;
+		this.classLoader = classLoader;
 	}
 
 	public Collection<Class<?>> classes(ClassFilter filter) {
@@ -55,7 +57,7 @@ public class Classpath {
 	}
 
 	private Class<?> classForFile(String fileName) throws ClassNotFoundException {
-		return Class.forName(classNameForFile(fileName));
+		return Class.forName(classNameForFile(fileName), true, classLoader);
 	}
 
 	private String classNameForFile(String fileName) {

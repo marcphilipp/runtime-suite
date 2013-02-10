@@ -28,6 +28,7 @@ public class ClassesOnClasspath implements ClassFinder {
 	private final Logger log = LoggerFactory.getLogger(ClassesOnClasspath.class);
 	private final ClassFilter withTestMethods = new ClassesWithTestMethods();
 	private final String classpathList;
+	private final ClassLoader classLoader;
 
 	/**
 	 * @param classpathList the list of directories to search for classes,
@@ -35,8 +36,13 @@ public class ClassesOnClasspath implements ClassFinder {
 	 * Each directory must be on the classpath.
 	 */
 	public ClassesOnClasspath(String classpathList) {
+		this(classpathList, ClassesOnClasspath.class.getClassLoader());
+	}
+
+	public ClassesOnClasspath(String classpathList, ClassLoader classLoader) {
 		log.debug(format("Classpath string is %s", classpathList));
 		this.classpathList = classpathList;
+		this.classLoader = classLoader;
 	}
 
 	/**
@@ -48,7 +54,7 @@ public class ClassesOnClasspath implements ClassFinder {
 		log.trace("> find()");
 		Set<Class<?>> testClasses = new HashSet<Class<?>>();
 		for(String path : classpathList.split(File.pathSeparator)) {
-			Classpath classpath = new Classpath(path);
+			Classpath classpath = new Classpath(path, classLoader);
 			testClasses.addAll(classpath.classes(withTestMethods));
 		}
 		return testClasses;
