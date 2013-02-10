@@ -1,14 +1,10 @@
 package com.dhemery.runtimesuite.internal.classpath;
 
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.dhemery.runtimesuite.ClassFilter;
 
@@ -18,7 +14,6 @@ import com.dhemery.runtimesuite.ClassFilter;
  * @author Dale H. Emery
  */
 public class Classpath {
-	private final Logger log = LoggerFactory.getLogger(Classpath.class);
 
 	private final FileInspector fileInspector = new FileInspector();
 	private final String classpath;
@@ -42,7 +37,6 @@ public class Classpath {
 	}
 
 	public Collection<Class<?>> classes(ClassFilter filter) {
-		log.debug(format("Gathering classes from %s", classpath));
 		return classes(fileNames(), filter);
 	}
 
@@ -62,14 +56,10 @@ public class Classpath {
 			if(fileInspector.isClassFile(fileName)) {
 				try {
 					Class<?> c = classForFile(fileName);
-					if(filter.passes(c))  {
-						log.trace(format("Gathered class %s", c));
+					if(filter.passes(c))
 						classes.add(c);
-					} else {
-						log.trace(format("Rejected class %s", c));
-					}
 				} catch (ClassNotFoundException e) {
-					log.warn(format("Unable to load class from file %s", fileName));
+					// ignore
 				}
 			}
 		}

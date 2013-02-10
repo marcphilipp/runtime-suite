@@ -5,15 +5,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.dhemery.runtimesuite.ClassFilter;
 import com.dhemery.runtimesuite.ClassFinder;
 import com.dhemery.runtimesuite.internal.ClassesWithTestMethods;
 import com.dhemery.runtimesuite.internal.classpath.Classpath;
-
-import static java.lang.String.*;
 
 /**
  * <p>
@@ -26,7 +21,6 @@ import static java.lang.String.*;
  */
 public class ClassesOnClasspath implements ClassFinder {
 
-	private final Logger log = LoggerFactory.getLogger(ClassesOnClasspath.class);
 	private final ClassFilter withTestMethods = new ClassesWithTestMethods();
 
 	private final String classpathList;
@@ -44,7 +38,6 @@ public class ClassesOnClasspath implements ClassFinder {
 	}
 
 	public ClassesOnClasspath(String classpathList, ClassLoader classLoader) {
-		log.debug(format("Classpath string is %s", classpathList));
 		this.classpathList = classpathList;
 		this.classLoader = classLoader;
 	}
@@ -60,7 +53,6 @@ public class ClassesOnClasspath implements ClassFinder {
 	 */
 	@Override
 	public Collection<Class<?>> find() {
-		log.trace("> find()");
 		Set<Class<?>> testClasses = new HashSet<Class<?>>();
 		for(String path : classpathList.split(File.pathSeparator)) {
 			Classpath classpath = new Classpath(path, classLoader);
