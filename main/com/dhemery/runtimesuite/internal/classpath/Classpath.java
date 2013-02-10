@@ -1,16 +1,16 @@
-package com.dhemery.runtimesuite.internal;
+package com.dhemery.runtimesuite.internal.classpath;
+
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.dhemery.runtimesuite.ClassFilter;
-
-import static java.lang.String.*;
 
 /**
  * Finds classes in a directory and its subdirectories.
@@ -27,17 +27,19 @@ public class Classpath {
 
 	public Collection<Class<?>> classes(ClassFilter filter) {
 		File directory = new File(classpath);
-		if(!directory.isDirectory()) return Collections.emptyList();
-		return classesInDirectory(directory, filter);
+		if(directory.isDirectory()) {
+			log.debug(format("Gathering classes from %s", classpath));
+			return collectClasses(new FilenamesInDirectory(directory), filter);
+		}
+		return emptyList();
 	}
 	
-	private Collection<Class<?>> classesInDirectory(File directory, ClassFilter filter) {
-		log.debug(format("Gathering classes from %s", classpath));
+	private Collection<Class<?>> collectClasses(Iterable<String> fileNames, ClassFilter filter) {
 		Collection<Class<?>> classes = new ArrayList<Class<?>>();
-		for(File file : directory.listFiles()) {
-			if(isClassFile(file)) {
+		for(String fileName : fileNames) {
+			if(isClassFile(fileName)) {
 				try {
-					Class<?> c = classForFile(file);
+					Class<?> c = classForFile(fileName);
 					if(filter.passes(c))  {
 						log.trace(format("Gathered class %s", c));
 						classes.add(c);
@@ -45,21 +47,19 @@ public class Classpath {
 						log.trace(format("Rejected class %s", c));
 					}
 				} catch (ClassNotFoundException e) {
-					log.warn(format("Unable to load class from file %s", file));
+					log.warn(format("Unable to load class from file %s", fileName));
 				}
-			} else if (file.isDirectory()) {
-				classes.addAll(classesInDirectory(file, filter));
 			}
 		}
 		return classes;
 	}
 
-	private Class<?> classForFile(File file) throws ClassNotFoundException {
-		return Class.forName(classNameForFile(file));
+	private Class<?> classForFile(String fileName) throws ClassNotFoundException {
+		return Class.forName(classNameForFile(fileName));
 	}
 
-	private String classNameForFile(File file) {
-		return convertFilePathToPackageName(stripExtension(stripClasspath(file.getPath())));
+	private String classNameForFile(String fileName) {
+		return convertFilePathToPackageName(stripExtension(fileName));
 	}
 
 	private String convertFilePathToPackageName(String filePath) {
@@ -71,15 +71,7 @@ public class Classpath {
 		return filePath.substring(0, baseNameLength);
 	}
 
-	private String stripClasspath(String filePath) {
-		return filePath.substring(classpath.length() + 1);
-	}
-
-	private boolean isClassFile(File file) {
-		return file.isFile() && hasClassExtension(file);
-	}
-
-	private boolean hasClassExtension(File file) {
-		return file.getName().endsWith(".class");
+	private boolean isClassFile(String fileName) {
+		return fileName.endsWith(".class");
 	}
 }

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.dhemery.runtimesuite.ClassFilter;
 import com.dhemery.runtimesuite.ClassFinder;
 import com.dhemery.runtimesuite.internal.ClassesWithTestMethods;
-import com.dhemery.runtimesuite.internal.Classpath;
+import com.dhemery.runtimesuite.internal.classpath.Classpath;
 
 import static java.lang.String.*;
 
