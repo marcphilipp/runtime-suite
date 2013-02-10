@@ -4,13 +4,13 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -27,21 +27,14 @@ public class AClassesOnClasspathFinder {
 	public static UnpackedJarFile secondJar = new UnpackedJarFile("/b.jar");
 
 	@ClassRule
-	public static UnpackedJarFile thirdJar = new UnpackedJarFile("/c.jar");
-
-	@ClassRule
 	public static UnpackedJarFile fourthJar = new UnpackedJarFile("/d.jar");
 
-	private static ClassLoader classLoader;
+	private ClassLoader classLoader;
 	
-	@BeforeClass
-	public static void prepareClassLoader() throws Exception {
-		URL[] urls = { firstJar.getURL(), secondJar.getURL(), thirdJar.getURL(), fourthJar.getURL() };
-		classLoader = new URLClassLoader(urls);
-	}
 
 	@Test public void findsAllClassesOnASingleElementClasspath() throws Exception {
 		String classpath = firstJar.getDirectory().getAbsolutePath();
+		classLoader = new URLClassLoader(new URL[] { firstJar.getURL() });
 		Collection<Class<?>> foundClasses = new ClassesOnClasspath(classpath, classLoader).find();
 		assertThat(foundClasses,  hasItems( classForName("a.Test_a_1"),
 											classForName("a.Test_a_2"),
@@ -54,11 +47,36 @@ public class AClassesOnClasspathFinder {
 											classForName("a.b.Test_ab_1"),
 											classForName("a.b.Test_ab_2")));
 	}
+	
+	@Test public void findsClassesInJarWhenActivated() throws Exception {
+		URL jarUrl = getClass().getResource("/a.jar");
+		String classpath = jarUrl.getPath();
+		classLoader = new URLClassLoader(new URL[] { jarUrl });
+		Collection<Class<?>> foundClasses = new ClassesOnClasspath(classpath, classLoader).includingJars().find();
+		assertThat(foundClasses,  hasItems( classForName("a.Test_a_1"),
+											classForName("a.Test_a_2"),
+											classForName("a.a.Test_aa_1"),
+											classForName("a.a.Test_aa_2"),
+											classForName("a.a.a.Test_aaa_1"),
+											classForName("a.a.a.Test_aaa_2"),
+											classForName("a.a.b.Test_aab_1"),
+											classForName("a.a.b.Test_aab_2"),
+											classForName("a.b.Test_ab_1"),
+											classForName("a.b.Test_ab_2")));
+	}
+	
+	@Test public void ignoresClassesInJarsByDefault() throws Exception {
+		URL jarUrl = getClass().getResource("/a.jar");
+		classLoader = new URLClassLoader(new URL[] { jarUrl });
+		Collection<Class<?>> foundClasses = new ClassesOnClasspath(jarUrl.getPath(), classLoader).find();
+		assertTrue(foundClasses.isEmpty());
+	}
 
 	@Test public void findsAllClassesOnAMultipleElementClasspath() throws Exception {
 		String classpath = firstJar.getDirectory().getAbsolutePath()
 						+ File.pathSeparator
 						+ secondJar.getDirectory().getAbsolutePath();
+		classLoader = new URLClassLoader(new URL[] { firstJar.getURL(), secondJar.getURL() });
 		Collection<Class<?>> foundClasses = new ClassesOnClasspath(classpath, classLoader).find();
 		assertThat(foundClasses, hasItems(	classForName("a.Test_a_1"),
 											classForName("a.Test_a_2"),
@@ -82,20 +100,12 @@ public class AClassesOnClasspathFinder {
 											classForName("b.b.b.Test_bbb_2")));
 	}
 	
-	@Test public void ignoresNonClassFiles() throws Exception {
-		// c.jar contains
-		//    - ./c/Test_c_1.class
-		//    - ./c/not-a-test.txt
-		String classpath = thirdJar.getDirectory().getAbsolutePath();
-		Collection<Class<?>> foundClasses = new ClassesOnClasspath(classpath, classLoader).find();
-		assertThat(foundClasses, hasItem(classForName("c.Test_c_1")));
-	}
-	
 	@Test public void ignoresNonTestClasses() throws Exception {
 		// d.jar contains
 		//    - ./d/Test_d_1.class
 		//    - ./d/NotATest_d_2.class
 		String classpath = fourthJar.getDirectory().getAbsolutePath();
+		classLoader = new URLClassLoader(new URL[] { fourthJar.getURL() });
 		Collection<Class<?>> foundClasses = new ClassesOnClasspath(classpath, classLoader).find();
 		assertThat(foundClasses, hasItem(classForName("d.Test_d_1")));
 	}

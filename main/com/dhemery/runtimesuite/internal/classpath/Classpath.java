@@ -27,16 +27,29 @@ public class Classpath {
 		this.classLoader = classLoader;
 	}
 
+	public boolean isJarOrZipFile() {
+		File file = classpathFile();
+		return hasExtension(file, ".jar") || hasExtension(file, ".zip");
+	}
+
+	public boolean isDirectory() {
+		return classpathFile().isDirectory();
+	}
+
 	public Collection<Class<?>> classes(ClassFilter filter) {
-		File directory = new File(classpath);
-		if(directory.isDirectory()) {
-			log.debug(format("Gathering classes from %s", classpath));
-			return collectClasses(new FilenamesInDirectory(directory), filter);
-		}
+		log.debug(format("Gathering classes from %s", classpath));
+		return classes(fileNames(), filter);
+	}
+
+	private Iterable<String> fileNames() {
+		if (isDirectory())
+			return new FilenamesInDirectory(classpathFile());
+		if (isJarOrZipFile())
+			return new FilenamesInJar(classpathFile());
 		return emptyList();
 	}
 	
-	private Collection<Class<?>> collectClasses(Iterable<String> fileNames, ClassFilter filter) {
+	private Collection<Class<?>> classes(Iterable<String> fileNames, ClassFilter filter) {
 		Collection<Class<?>> classes = new ArrayList<Class<?>>();
 		for(String fileName : fileNames) {
 			if(isClassFile(fileName)) {
@@ -75,5 +88,13 @@ public class Classpath {
 
 	private boolean isClassFile(String fileName) {
 		return fileName.endsWith(".class");
+	}
+
+	private boolean hasExtension(File file, String extension) {
+		return file.getName().endsWith(extension) || file.getName().endsWith(extension.toUpperCase());
+	}
+
+	private File classpathFile() {
+		return new File(classpath);
 	}
 }

@@ -20,15 +20,19 @@ import static java.lang.String.*;
  * A finder that finds every class in the specified directories on the classpath.
  * </p>
  * <p>
- * Note: The current implementation searches only directories, not jar files.
+ * Note: The current implementation searches directories and (optionally) jar files.
  * </p>
  * @author Dale H. Emery
  */
 public class ClassesOnClasspath implements ClassFinder {
+
 	private final Logger log = LoggerFactory.getLogger(ClassesOnClasspath.class);
 	private final ClassFilter withTestMethods = new ClassesWithTestMethods();
+
 	private final String classpathList;
 	private final ClassLoader classLoader;
+
+	private boolean includeJars;
 
 	/**
 	 * @param classpathList the list of directories to search for classes,
@@ -45,6 +49,11 @@ public class ClassesOnClasspath implements ClassFinder {
 		this.classLoader = classLoader;
 	}
 
+	public ClassesOnClasspath includingJars() {
+		includeJars = true;
+		return this;
+	}
+
 	/**
 	 * Finds all classes in the directories listed in this finder's {@code classpathList}.
 	 * @return a {@link Collection} of all classes in the directories listed in this finder's {@code classpathList}.
@@ -55,8 +64,13 @@ public class ClassesOnClasspath implements ClassFinder {
 		Set<Class<?>> testClasses = new HashSet<Class<?>>();
 		for(String path : classpathList.split(File.pathSeparator)) {
 			Classpath classpath = new Classpath(path, classLoader);
-			testClasses.addAll(classpath.classes(withTestMethods));
+			if (include(classpath))
+				testClasses.addAll(classpath.classes(withTestMethods));
 		}
 		return testClasses;
+	}
+
+	private boolean include(Classpath classpath) {
+		return classpath.isDirectory() || classpath.isJarOrZipFile() && includeJars;
 	}
 }
