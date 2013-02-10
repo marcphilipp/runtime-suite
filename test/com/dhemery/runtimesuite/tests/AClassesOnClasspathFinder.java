@@ -30,7 +30,6 @@ public class AClassesOnClasspathFinder {
 	public static UnpackedJarFile fourthJar = new UnpackedJarFile("/d.jar");
 
 	private ClassLoader classLoader;
-	
 
 	@Test public void findsAllClassesOnASingleElementClasspath() throws Exception {
 		String classpath = firstJar.getDirectory().getAbsolutePath();

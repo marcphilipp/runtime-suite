@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.dhemery.runtimesuite.ClassFilter;
 import com.dhemery.runtimesuite.ClassFinder;
-import com.dhemery.runtimesuite.internal.ClassesWithTestMethods;
+import com.dhemery.runtimesuite.internal.ClassesWithRunner;
 import com.dhemery.runtimesuite.internal.classpath.Classpath;
 
 /**
@@ -20,8 +20,6 @@ import com.dhemery.runtimesuite.internal.classpath.Classpath;
  * @author Dale H. Emery
  */
 public class ClassesOnClasspath implements ClassFinder {
-
-	private final ClassFilter withTestMethods = new ClassesWithTestMethods();
 
 	private final String classpathList;
 	private final ClassLoader classLoader;
@@ -53,11 +51,12 @@ public class ClassesOnClasspath implements ClassFinder {
 	 */
 	@Override
 	public Collection<Class<?>> find() {
+		ClassFilter withTestRunner = new ClassesWithRunner();
 		Set<Class<?>> testClasses = new HashSet<Class<?>>();
 		for(String path : classpathList.split(File.pathSeparator)) {
 			Classpath classpath = new Classpath(path, classLoader);
 			if (include(classpath))
-				testClasses.addAll(classpath.classes(withTestMethods));
+				testClasses.addAll(classpath.classes(withTestRunner));
 		}
 		return testClasses;
 	}

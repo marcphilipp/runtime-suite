@@ -3,17 +3,20 @@ package com.dhemery.runtimesuite;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.junit.runner.Description;
+import org.junit.runner.Request;
 import org.junit.runner.Runner;
+import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 
+import com.dhemery.runtimesuite.internal.RuntimeFilterAdapter;
 import com.dhemery.runtimesuite.internal.SuiteInspector;
-import com.dhemery.runtimesuite.internal.RunnableClass;
 
 /**
  * <p>
@@ -86,11 +89,9 @@ import com.dhemery.runtimesuite.internal.RunnableClass;
  * @see org.junit.runners.RunWith
  */
 public class RuntimeSuite extends ParentRunner<Runner> {
-	private final List<Runner> runners;
+
 	private final SuiteInspector inspector;
-	private final List<ClassFinder> classFinders;
-	private final List<ClassFilter> classFilters;
-	private final List<MethodFilter> methodFilters;
+	private final List<Runner> runners;
 
 	/**
 	 * Called reflectively by JUnit to initialize a suite before running its tests.
@@ -100,15 +101,12 @@ public class RuntimeSuite extends ParentRunner<Runner> {
 	public RuntimeSuite(Class<?> suiteClass) throws InitializationError {
 		super(suiteClass);
 		inspector = new SuiteInspector(suiteClass);
-		classFinders = inspector.classFinders();
-		classFilters = inspector.classFilters();
-		methodFilters = inspector.methodFilters();
 		runners = runnersFor(classesInSuite());
 	}
 
 	private Set<Class<?>> classesInSuite() throws InitializationError {
-		Set<Class<?>> classes = new HashSet<Class<?>>();
-		for(ClassFinder finder : classFinders) {
+		Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
+		for(ClassFinder finder : inspector.classFinders()) {
 			classes.addAll(finder.find());
 		}
 		return classes;
@@ -134,11 +132,15 @@ public class RuntimeSuite extends ParentRunner<Runner> {
 	}
 
 	private List<Runner> runnersFor(Collection<Class<?>> classes) throws InitializationError {
+		RuntimeFilterAdapter filter = new RuntimeFilterAdapter(inspector);
 		List<Runner> runners = new ArrayList<Runner>();
 		for(Class<?> c : classes) {
-			RunnableClass runnable = new RunnableClass(c, classFilters, methodFilters);
-			if(runnable.isRunnable()) {
-				runners.add(runnable.runner());
+			try {
+				Runner runner = Request.aClass(c).getRunner();
+				filter.apply(runner);
+				runners.add(runner);
+			} catch (NoTestsRemainException e) {
+				// ignore
 			}
 		}
 		return runners;

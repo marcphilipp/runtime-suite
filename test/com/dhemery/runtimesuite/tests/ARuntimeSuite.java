@@ -1,13 +1,18 @@
 package com.dhemery.runtimesuite.tests;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
+
 import java.util.List;
 
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
 
 import com.dhemery.runtimesuite.helpers.IsCollectionThat;
 import com.dhemery.runtimesuite.helpers.SuiteRunListener;
@@ -19,8 +24,11 @@ import example.suites.SuiteWithClassFilterDeclaredAsSubtype;
 import example.suites.SuiteWithClassFinderDeclaredAsSubtype;
 import example.suites.SuiteWithGoodAndBadClassFilters;
 import example.suites.SuiteWithGoodAndBadClassFinders;
+import example.suites.SuiteWithJUnit3StyleSuite;
+import example.suites.SuiteWithJUnit3TestCase;
 import example.suites.SuiteWithMethodFilters;
 import example.suites.SuiteWithNoMethodFilters;
+import example.suites.SuiteWithRunWithClassFromFinder;
 import example.suites.SuiteWithTwoFinders;
 
 public class ARuntimeSuite {
@@ -96,7 +104,25 @@ public class ARuntimeSuite {
 
 	@Test
 	public void ignoresNonTestMethods() {
-		runner.run(SuiteWithAllBadTests.class);
-		assertThat(executed.tests.size(), is(0));
+		Result result = runner.run(SuiteWithAllBadTests.class);
+		assertThat(result.getFailureCount(), is(3));
+	}
+
+	@Test
+	public void runsClassesAnnotatedUsingRunWith() throws Exception {
+		runner.run(SuiteWithRunWithClassFromFinder.class);
+		assertThat(executed.tests, hasItems("theoryTest"));
+	}
+
+	@Test
+	public void runsJUnit3TestCases() throws Exception {
+		runner.run(SuiteWithJUnit3TestCase.class);
+		assertThat(executed.tests, hasItems("testHelloJUnit3"));
+	}
+
+	@Test
+	public void runsJUnit3StyleSuite() throws Exception {
+		runner.run(SuiteWithJUnit3StyleSuite.class);
+		assertThat(executed.tests, hasItems("testHelloJUnit3"));
 	}
 }
