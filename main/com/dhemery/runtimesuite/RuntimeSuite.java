@@ -119,13 +119,6 @@ public class RuntimeSuite extends ParentRunner<Runner> {
 		return runners;
 	}
 
-	/**
-	 * Used only for testing.
-	 */
-	public Collection<Runner> getRunners() {
-		return getChildren();
-	}
-
 	protected void runChild(Runner child, RunNotifier notifier) {
 		child.run(notifier);
 	}
