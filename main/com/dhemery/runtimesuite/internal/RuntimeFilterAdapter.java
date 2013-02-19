@@ -27,16 +27,18 @@ public class RuntimeFilterAdapter extends Filter {
 
 	@Override
 	public boolean shouldRun(Description description) {
-		return (passesClassFilters(description) && passedMethodFilters(description)) || atLeastOneChildPasses(description);
+		return description.isTest() ? passesClassAndMethodFilters(description) : atLeastOneChildPasses(description);
+	}
+
+	private boolean passesClassAndMethodFilters(Description description) {
+		return passesClassFilters(description) && passedMethodFilters(description);
 	}
 
 	private boolean passedMethodFilters(Description description) {
-		if (description.getMethodName() != null) {
-			Method[] methods = description.getTestClass().getMethods();
-			for (Method method : methods) {
-				if (method.getName().equals(description.getMethodName())) {
-					return passesFilters(method);
-				}
+		Method[] methods = description.getTestClass().getMethods();
+		for (Method method : methods) {
+			if (method.getName().equals(description.getMethodName())) {
+				return passesFilters(method);
 			}
 		}
 		return true;

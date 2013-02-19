@@ -25,6 +25,7 @@ import example.suites.SuiteWithClassFinderDeclaredAsSubtype;
 import example.suites.SuiteWithGoodAndBadClassFilters;
 import example.suites.SuiteWithGoodAndBadClassFinders;
 import example.suites.SuiteWithJUnit3StyleSuite;
+import example.suites.SuiteWithJUnit3StyleSuiteAndFilter;
 import example.suites.SuiteWithJUnit3TestCase;
 import example.suites.SuiteWithMethodFilters;
 import example.suites.SuiteWithNoMethodFilters;
@@ -52,10 +53,6 @@ public class ARuntimeSuite {
 	public void runsEachTestOnceEvenIfFoundMultipleTimes() {
 		runner.run(SuiteThatFindsATestClassSeveralTimes.class);
 		assertThat(executed.tests, not(hasDuplicates()));
-	}
-
-	private Matcher<List<String>> hasDuplicates() {
-		return IsCollectionThat.<String>hasDuplicates();
 	}
 	
 	@Test
@@ -100,6 +97,7 @@ public class ARuntimeSuite {
 	public void runsOnlyTestMethodsThatSurviveMethodFilters() {
 		runner.run(SuiteWithMethodFilters.class);
 		assertThat(executed.tests, hasItem("a_test1"));
+		assertThat(executed.tests, not(hasItems("a_test2", "b_test1", "b_test2")));
 	}
 
 	@Test
@@ -123,6 +121,16 @@ public class ARuntimeSuite {
 	@Test
 	public void runsJUnit3StyleSuite() throws Exception {
 		runner.run(SuiteWithJUnit3StyleSuite.class);
-		assertThat(executed.tests, hasItems("testHelloJUnit3"));
+		assertThat(executed.tests, hasItem("testHelloJUnit3"));
+	}
+
+	@Test
+	public void appliesFilterToJUnit3StyleSuite() throws Exception {
+		runner.run(SuiteWithJUnit3StyleSuiteAndFilter.class);
+		assertThat(executed.tests, not(hasItem("testHelloJUnit3")));
+	}
+
+	private Matcher<List<String>> hasDuplicates() {
+		return IsCollectionThat.<String>hasDuplicates();
 	}
 }
