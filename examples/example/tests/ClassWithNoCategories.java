@@ -1,3 +1,7 @@
 package example.tests;
 
-public class ClassWithNoCategories {}
+import org.junit.Test;
+
+public class ClassWithNoCategories {
+	@Test public void method() {}
+}
