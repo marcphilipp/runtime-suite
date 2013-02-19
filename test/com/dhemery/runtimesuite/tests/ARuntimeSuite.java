@@ -25,7 +25,8 @@ import example.suites.SuiteWithClassFinderDeclaredAsSubtype;
 import example.suites.SuiteWithGoodAndBadClassFilters;
 import example.suites.SuiteWithGoodAndBadClassFinders;
 import example.suites.SuiteWithJUnit3StyleSuite;
-import example.suites.SuiteWithJUnit3StyleSuiteAndFilter;
+import example.suites.SuiteWithJUnit3StyleSuiteAndClassFilter;
+import example.suites.SuiteWithJUnit3StyleSuiteAndMethodFilter;
 import example.suites.SuiteWithJUnit3TestCase;
 import example.suites.SuiteWithMethodFilters;
 import example.suites.SuiteWithNoMethodFilters;
@@ -125,8 +126,14 @@ public class ARuntimeSuite {
 	}
 
 	@Test
-	public void appliesFilterToJUnit3StyleSuite() throws Exception {
-		runner.run(SuiteWithJUnit3StyleSuiteAndFilter.class);
+	public void appliesMethodFilterToJUnit3StyleSuite() throws Exception {
+		runner.run(SuiteWithJUnit3StyleSuiteAndMethodFilter.class);
+		assertThat(executed.tests, not(hasItem("testHelloJUnit3")));
+	}
+
+	@Test
+	public void appliesClassFilterToJUnit3StyleSuite() throws Exception {
+		runner.run(SuiteWithJUnit3StyleSuiteAndClassFilter.class);
 		assertThat(executed.tests, not(hasItem("testHelloJUnit3")));
 	}
 

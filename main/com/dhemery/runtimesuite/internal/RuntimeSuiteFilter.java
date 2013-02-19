@@ -10,12 +10,12 @@ import org.junit.runners.model.InitializationError;
 import com.dhemery.runtimesuite.ClassFilter;
 import com.dhemery.runtimesuite.MethodFilter;
 
-public class RuntimeFilterAdapter extends Filter {
+public class RuntimeSuiteFilter extends Filter {
 
 	private List<ClassFilter> classFilters;
 	private List<MethodFilter> methodFilters;
 
-	public RuntimeFilterAdapter(SuiteInspector inspector) throws InitializationError {
+	public RuntimeSuiteFilter(SuiteInspector inspector) throws InitializationError {
 		classFilters = inspector.classFilters();
 		methodFilters = inspector.methodFilters();
 	}
@@ -27,11 +27,9 @@ public class RuntimeFilterAdapter extends Filter {
 
 	@Override
 	public boolean shouldRun(Description description) {
-		return description.isTest() ? passesClassAndMethodFilters(description) : atLeastOneChildPasses(description);
-	}
-
-	private boolean passesClassAndMethodFilters(Description description) {
-		return passesClassFilters(description) && passedMethodFilters(description);
+		if (passesClassFilters(description))
+			return description.isTest() ? passedMethodFilters(description) : atLeastOneChildPasses(description);
+		return false;
 	}
 
 	private boolean passedMethodFilters(Description description) {
@@ -53,6 +51,9 @@ public class RuntimeFilterAdapter extends Filter {
 	}
 
 	private boolean passesClassFilters(Description description) {
+		if (description.getTestClass() == null) {
+			return true;
+		}
 		for(ClassFilter filter : classFilters) {
 			if(!filter.passes(description.getTestClass()))
 				return false;

@@ -14,7 +14,7 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 
-import com.dhemery.runtimesuite.internal.RuntimeFilterAdapter;
+import com.dhemery.runtimesuite.internal.RuntimeSuiteFilter;
 import com.dhemery.runtimesuite.internal.SuiteInspector;
 
 /**
@@ -124,7 +124,7 @@ public class RuntimeSuite extends ParentRunner<Runner> {
 	}
 
 	private List<Runner> runnersFor(Collection<Class<?>> classes) throws InitializationError {
-		RuntimeFilterAdapter filter = new RuntimeFilterAdapter(inspector);
+		RuntimeSuiteFilter filter = new RuntimeSuiteFilter(inspector);
 		List<Runner> runners = new ArrayList<Runner>();
 		for(Class<?> c : classes) {
 			try {
