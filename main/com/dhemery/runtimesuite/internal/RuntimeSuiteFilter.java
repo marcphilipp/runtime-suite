@@ -32,24 +32,6 @@ public class RuntimeSuiteFilter extends Filter {
 		return false;
 	}
 
-	private boolean passedMethodFilters(Description description) {
-		Method[] methods = description.getTestClass().getMethods();
-		for (Method method : methods) {
-			if (method.getName().equals(description.getMethodName())) {
-				return passesFilters(method);
-			}
-		}
-		return true;
-	}
-
-	private boolean atLeastOneChildPasses(Description description) {
-		for (Description child : description.getChildren()) {
-			if (shouldRun(child))
-				return true;
-		}
-		return false;
-	}
-
 	private boolean passesClassFilters(Description description) {
 		if (description.getTestClass() == null) {
 			return true;
@@ -61,11 +43,29 @@ public class RuntimeSuiteFilter extends Filter {
 		return true;
 	}
 
-	private boolean passesFilters(Method method) {
+	private boolean passedMethodFilters(Description description) {
+		Method[] methods = description.getTestClass().getMethods();
+		for (Method method : methods) {
+			if (method.getName().equals(description.getMethodName())) {
+				return passedMethodFilters(method);
+			}
+		}
+		return true;
+	}
+
+	private boolean passedMethodFilters(Method method) {
 		for(MethodFilter filter : methodFilters) {
 			if(!filter.passes(method))
 				return false;
 		}
 		return true;
+	}
+
+	private boolean atLeastOneChildPasses(Description description) {
+		for (Description child : description.getChildren()) {
+			if (shouldRun(child))
+				return true;
+		}
+		return false;
 	}
 }
