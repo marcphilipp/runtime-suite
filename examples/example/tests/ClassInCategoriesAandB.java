@@ -1,6 +1,6 @@
 package example.tests;
 
-import com.dhemery.runtimesuite.filters.Category;
+import org.junit.experimental.categories.Category;
 
 import example.categories.CategoryA;
 import example.categories.CategoryB;

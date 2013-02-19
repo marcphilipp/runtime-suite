@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.dhemery.runtimesuite.filters.Category;
+import org.junit.experimental.categories.Category;
 
 public class CategoryMatcher<T extends AnnotatedElement> {
 	private final Collection<Class<?>> matchingCategories;
